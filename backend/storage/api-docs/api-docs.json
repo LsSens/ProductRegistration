@@ -311,6 +311,28 @@
                         "description": "Erro de validação"
                     }
                 }
+            },
+            "delete": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Deletar um produto",
+                "operationId": "b49ce9f3cb168b233245548fb4ef36d3",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Produto deletado com sucesso"
+                    }
+                }
             }
         }
     },

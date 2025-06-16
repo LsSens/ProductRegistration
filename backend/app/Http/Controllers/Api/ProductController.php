@@ -208,4 +208,28 @@ class ProductController extends Controller
             'data' => $product
         ]);
     }
+
+    /**
+     * @OA\Delete(
+     *     path="/api/products/{id}",
+     *     summary="Deletar um produto",
+     *     tags={"Products"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(response=200, description="Produto deletado com sucesso")
+     * )
+     */
+    public function destroy($id): JsonResponse
+    {
+        $product = Product::find($id);
+        if (!$product) {
+            return response()->json(['message' => 'Produto não encontrado'], 404);
+        }
+        $product->delete();
+        return response()->json(['message' => 'Produto deletado com sucesso']);
+    }
 }
