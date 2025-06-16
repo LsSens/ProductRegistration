@@ -1,5 +1,5 @@
 <script setup>
-import ProductForm from './components/ProductForm.vue'
+// Layout principal
 </script>
 
 <template>
@@ -8,7 +8,7 @@ import ProductForm from './components/ProductForm.vue'
       <h1>ConstrUP - Cadastro de Produtos</h1>
     </header>
     <main>
-      <ProductForm />
+      <router-view />
     </main>
   </div>
 </template>

@@ -62,8 +62,16 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted, watch } from 'vue'
 import axios from 'axios'
+import { useRouter } from 'vue-router'
+
+const props = defineProps({
+  editId: {
+    type: [String, Number],
+    default: null
+  }
+})
 
 const form = reactive({
   name: '',
@@ -75,6 +83,18 @@ const form = reactive({
 const errors = ref({})
 const loading = ref(false)
 const success = ref(false)
+const router = useRouter()
+
+const fetchProduct = async () => {
+  if (props.editId) {
+    loading.value = true
+    try {
+      const res = await axios.get(`http://localhost:8000/api/products/${props.editId}`)
+      Object.assign(form, res.data.data)
+    } catch (e) {}
+    loading.value = false
+  }
+}
 
 const handleSubmit = async () => {
   loading.value = true
@@ -82,12 +102,18 @@ const handleSubmit = async () => {
   success.value = false
 
   try {
-    const response = await axios.post('http://localhost:8000/api/products', form)
-    success.value = true
-    form.name = ''
-    form.description = ''
-    form.price = ''
-    form.quantity = ''
+    if (props.editId) {
+      await axios.put(`http://localhost:8000/api/products/${props.editId}`, form)
+      success.value = true
+      setTimeout(() => router.push('/'), 1200)
+    } else {
+      await axios.post('http://localhost:8000/api/products', form)
+      success.value = true
+      form.name = ''
+      form.description = ''
+      form.price = ''
+      form.quantity = ''
+    }
   } catch (error) {
     if (error.response?.data?.errors) {
       errors.value = error.response.data.errors
@@ -96,6 +122,9 @@ const handleSubmit = async () => {
     loading.value = false
   }
 }
+
+onMounted(fetchProduct)
+watch(() => props.editId, fetchProduct)
 </script>
 
 <style scoped>
