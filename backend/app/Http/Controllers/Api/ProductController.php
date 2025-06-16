@@ -8,6 +8,11 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
 /**
+ * @OA\Info(
+ *     title="API de Produtos ConstrUP",
+ *     version="1.0.0",
+ *     description="Documentação da API de cadastro de produtos"
+ * )
  * @OA\Tag(
  *     name="Products",
  *     description="API Endpoints para gerenciamento de produtos"
