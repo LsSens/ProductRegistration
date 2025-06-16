@@ -8,7 +8,7 @@
     </div>
 
     <div v-if="loading" class="product-list">
-      <ProductSkeleton v-for="n in 6" :key="n" />
+      <ProductSkeleton v-for="n in 3" :key="n" />
     </div>
     <div v-else-if="products.length === 0" class="empty-state">
       <p>Nenhum produto cadastrado</p>
@@ -19,7 +19,6 @@
         v-for="product in products"
         :key="product.id"
         :product="product"
-        @view="viewProduct"
         @edit="editProduct"
         @delete="confirmDelete"
       />
@@ -100,38 +99,6 @@
       </div>
     </div>
 
-    <div v-if="showViewModal" class="modal-overlay">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h2>Detalhes do Produto</h2>
-          <button @click="closeModal" class="close-button">&times;</button>
-        </div>
-        <div class="modal-body">
-          <div v-if="loading" class="loading">
-            <ModalSkeleton />
-          </div>
-          <div v-else class="product-details">
-            <div class="detail-group">
-              <label>Nome:</label>
-              <p>{{ selectedProduct.name }}</p>
-            </div>
-            <div class="detail-group">
-              <label>Descrição:</label>
-              <p>{{ selectedProduct.description || 'Sem descrição' }}</p>
-            </div>
-            <div class="detail-group">
-              <label>Preço:</label>
-              <p>{{ formatPrice(selectedProduct.price) }}</p>
-            </div>
-            <div class="detail-group">
-              <label>Quantidade:</label>
-              <p>{{ selectedProduct.quantity }}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <div v-if="showDeleteModal" class="modal-overlay">
       <div class="modal-content">
         <div class="modal-header">
@@ -147,7 +114,7 @@
             <div class="modal-actions">
               <button @click="closeModal" class="btn-cancel">Cancelar</button>
               <button @click="deleteProduct" :disabled="loading" class="btn-delete">
-                {{ loading ? 'Excluindo...' : 'Excluir' }}
+                {{ loading ? 'Excluindo...' : 'Confirmar' }}
               </button>
             </div>
           </div>
@@ -173,9 +140,7 @@ const products = ref([])
 const loading = ref(true)
 const showCreateModal = ref(false)
 const showEditModal = ref(false)
-const showViewModal = ref(false)
 const showDeleteModal = ref(false)
-const selectedProduct = ref(null)
 const productToDelete = ref(null)
 const formValues = ref({
   name: '',
@@ -240,7 +205,7 @@ const handleSubmit = async () => {
     }
 
     if (showEditModal.value) {
-      await axios.put(`http://localhost:8000/api/products/${selectedProduct.value.id}`, formData)
+      await axios.put(`http://localhost:8000/api/products/${productToDelete.value.id}`, formData)
       toast.success("Produto atualizado com sucesso!")
     } else {
       await axios.post('http://localhost:8000/api/products', formData)
@@ -266,13 +231,8 @@ const handleSubmit = async () => {
   }
 }
 
-const viewProduct = (product) => {
-  selectedProduct.value = product
-  showViewModal.value = true
-}
-
 const editProduct = (product) => {
-  selectedProduct.value = product
+  productToDelete.value = product
   formValues.value = {
     ...product,
     description: product.description || ''
@@ -299,9 +259,7 @@ const deleteProduct = async () => {
 const closeModal = () => {
   showCreateModal.value = false
   showEditModal.value = false
-  showViewModal.value = false
   showDeleteModal.value = false
-  selectedProduct.value = null
   productToDelete.value = null
   formValues.value = {
     name: '',

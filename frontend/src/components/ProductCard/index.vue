@@ -9,7 +9,6 @@
       </div>
     </div>
     <div class="actions">
-      <button @click="$emit('view', product)" class="btn-view">Visualizar</button>
       <button @click="$emit('edit', product)" class="btn-edit">Editar</button>
       <button @click="$emit('delete', product)" class="btn-delete">Excluir</button>
     </div>
