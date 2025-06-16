@@ -27,3 +27,7 @@ a,
     place-items: center;
   }
 }
+
+textarea.form-control {
+  resize: none;
+}
