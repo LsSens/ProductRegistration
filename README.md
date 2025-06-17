@@ -74,12 +74,22 @@ http://localhost:8000/api/documentation
 - Axios
 - Swagger/OpenAPI
 - MySQL/SQLite
+- Formik + Yup
+- Vue Toastification
 
 ## Funcionalidades
 
-- Cadastro de produtos com validação
-- Interface responsiva e moderna
-- Documentação da API com Swagger
-- Validação de dados no frontend e backend
+### Frontend
+- Lista de cards com scroll infinito e paginação
+- Componentes reutilizáveis para CRUD
+- Notificações toast para feedback
+- Loading states com skeleton
+- Validação de formulários com Formik e Yup
+
+### Backend
+- API RESTful para produtos (GET, POST, PUT, DELETE)
+- Documentação completa com Swagger
+- Paginação na listagem de produtos
+- Validação de dados
 - Mensagens de sucesso e erro
 - Tema visual personalizado (amarelo e preto) 
