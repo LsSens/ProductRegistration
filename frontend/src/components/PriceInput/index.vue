@@ -7,7 +7,7 @@
         :value="formattedValue"
         @input="handleInput"
         @blur="handleBlur"
-        :class="['form-control', { 'error': error }]"
+        :class="['form-control', { 'error': isInvalid }]"
         placeholder="0,00"
       />
     </div>
@@ -15,7 +15,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
 const props = defineProps({
   modelValue: {
@@ -29,6 +29,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:modelValue', 'blur'])
+
+const touched = ref(false)
 
 const formatCurrency = (value) => {
   if (!value) return ''
@@ -61,6 +63,11 @@ const formattedValue = computed(() => {
   return formatCurrency(props.modelValue)
 })
 
+const isInvalid = computed(() => {
+  const value = parseFloat(props.modelValue)
+  return (isNaN(value) || value <= 0) && touched.value
+})
+
 const handleInput = (event) => {
   const value = event.target.value
   const parsedValue = parseCurrency(value)
@@ -68,6 +75,7 @@ const handleInput = (event) => {
 }
 
 const handleBlur = () => {
+  touched.value = true
   if (props.modelValue) {
     const value = parseFloat(props.modelValue)
     emit('update:modelValue', value.toFixed(2))
