@@ -1,5 +1,6 @@
 <script setup>
 import ScrollToTop from './components/ScrollToTop/index.vue'
+import ProductList from './components/ProductList/index.vue'
 </script>
 
 <template>
@@ -8,7 +9,7 @@ import ScrollToTop from './components/ScrollToTop/index.vue'
       <h1>ConstrUP - Cadastro de Produtos</h1>
     </header>
     <main>
-      <router-view />
+      <ProductList />
       <ScrollToTop />
     </main>
   </div>
