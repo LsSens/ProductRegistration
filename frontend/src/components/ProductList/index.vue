@@ -7,7 +7,7 @@
       </button>
     </div>
 
-    <div v-if="loading" class="product-list">
+    <div v-if="initialLoading" class="product-list">
       <ProductSkeleton v-for="n in 3" :key="n" />
     </div>
     <div v-else-if="products.length === 0" class="empty-state">
@@ -22,6 +22,7 @@
         @edit="editProduct"
         @delete="confirmDelete"
       />
+      <CircularProgress v-if="loadingMore" />
     </div>
 
     <div v-if="showCreateModal || showEditModal" class="modal-overlay">
@@ -31,7 +32,10 @@
           <button @click="closeModal" class="close-button">&times;</button>
         </div>
         <div class="modal-body">
-          <form @submit.prevent="handleSubmit" class="form">
+          <div v-if="loading" class="loading">
+            <ModalSkeleton />
+          </div>
+          <form v-else @submit.prevent="handleSubmit" class="form">
             <div class="form-group">
               <label for="name">Nome do Produto *</label>
               <input
@@ -125,19 +129,25 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import axios from 'axios'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useToast } from 'vue-toastification'
 import ProductSkeleton from '../ProductSkeleton/index.vue'
 import ModalSkeleton from '../ModalSkeleton/index.vue'
 import ProductCard from '../ProductCard/index.vue'
 import PriceInput from '../PriceInput/index.vue'
+import CircularProgress from '../CircularProgress/index.vue'
+import { productService } from '@/services/productService'
 import * as Yup from 'yup'
 
 const toast = useToast()
 
 const products = ref([])
-const loading = ref(true)
+const loading = ref(false)
+const initialLoading = ref(true)
+const loadingMore = ref(false)
+const currentPage = ref(1)
+const hasMorePages = ref(true)
+const perPage = 10
 const showCreateModal = ref(false)
 const showEditModal = ref(false)
 const showDeleteModal = ref(false)
@@ -188,6 +198,54 @@ const handleBlur = (field) => {
   validateField(field, formValues.value[field])
 }
 
+const handleScroll = async () => {
+  if (loading.value || !hasMorePages.value) return
+
+  const scrollPosition = window.innerHeight + window.scrollY
+  const documentHeight = document.documentElement.scrollHeight
+
+  if (scrollPosition >= documentHeight - 100) {
+    await loadMoreProducts()
+  }
+}
+
+const loadMoreProducts = async () => {
+  if (loadingMore.value || !hasMorePages.value) return
+
+  loadingMore.value = true
+  try {
+    const response = await productService.getProducts(currentPage.value, perPage)
+    const newProducts = response.data
+
+    if (newProducts.length === 0) {
+      hasMorePages.value = false
+      return
+    }
+
+    products.value = [...products.value, ...newProducts]
+    currentPage.value++
+  } catch (e) {
+    toast.error("Erro ao carregar mais produtos")
+  } finally {
+    loadingMore.value = false
+  }
+}
+
+const fetchProducts = async () => {
+  initialLoading.value = true
+  currentPage.value = 1
+  hasMorePages.value = true
+  try {
+    const response = await productService.getProducts(currentPage.value, perPage)
+    products.value = response.data
+    currentPage.value++
+  } catch (e) {
+    toast.error("Erro ao carregar produtos")
+  } finally {
+    initialLoading.value = false
+  }
+}
+
 const handleSubmit = async () => {
   isSubmitting.value = true
   try {
@@ -205,10 +263,10 @@ const handleSubmit = async () => {
     }
 
     if (showEditModal.value) {
-      await axios.put(`http://localhost:8000/api/products/${productToDelete.value.id}`, formData)
+      await productService.updateProduct(productToDelete.value.id, formData)
       toast.success("Produto atualizado com sucesso!")
     } else {
-      await axios.post('http://localhost:8000/api/products', formData)
+      await productService.createProduct(formData)
       toast.success("Produto cadastrado com sucesso!")
     }
     closeModal()
@@ -247,7 +305,7 @@ const confirmDelete = (product) => {
 
 const deleteProduct = async () => {
   try {
-    await axios.delete(`http://localhost:8000/api/products/${productToDelete.value.id}`)
+    await productService.deleteProduct(productToDelete.value.id)
     products.value = products.value.filter(p => p.id !== productToDelete.value.id)
     showDeleteModal.value = false
     toast.success("Produto excluído com sucesso!")
@@ -271,17 +329,6 @@ const closeModal = () => {
   touched.value = {}
 }
 
-const fetchProducts = async () => {
-  loading.value = true
-  try {
-    const res = await axios.get('http://localhost:8000/api/products')
-    products.value = res.data.data
-  } catch (e) {
-    toast.error("Erro ao carregar produtos")
-  }
-  loading.value = false
-}
-
 const openCreateModal = () => {
   formValues.value = {
     name: '',
@@ -294,16 +341,14 @@ const openCreateModal = () => {
   showCreateModal.value = true
 }
 
-function formatPrice(value) {
-  if (value == null || value === '') return 'R$ 0,00';
-  return Number(value).toLocaleString('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-    minimumFractionDigits: 2
-  });
-}
+onMounted(() => {
+  fetchProducts()
+  window.addEventListener('scroll', handleScroll)
+})
 
-onMounted(fetchProducts)
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll)
+})
 </script>
 
 <style src="./styles.css" scoped></style>
