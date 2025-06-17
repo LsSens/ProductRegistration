@@ -5,7 +5,6 @@ import App from './App.vue'
 
 import Toast from 'vue-toastification'
 import 'vue-toastification/dist/index.css'
-import money3 from 'v-money3'
 
 const app = createApp(App)
 
