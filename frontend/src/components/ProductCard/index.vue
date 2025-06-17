@@ -7,7 +7,15 @@
     <div class="product-info">
       <p class="desc" :title="product.description">{{ formatText(product.description, 60) }}</p>
       <div class="details">
-        <span>Preço: <b>{{ formatPrice(product.price) }}</b></span>
+        <span>
+          Preço: 
+          <b 
+            :title="`${formatPrice(product.price)}`"
+            class="price-tooltip"
+          >
+            {{ formatPrice(product.price, 15) }}
+          </b>
+        </span>
         <span>Qtd: <b>{{ product.quantity }}</b></span>
       </div>
     </div>
@@ -35,4 +43,24 @@ defineProps({
 defineEmits(['edit', 'delete'])
 </script>
 
-<style src="./styles.css" scoped></style>
+<style src="./styles.css" scoped>
+.price-tooltip {
+  cursor: help;
+  position: relative;
+}
+
+.price-tooltip:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 5px 10px;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 1000;
+}
+</style>

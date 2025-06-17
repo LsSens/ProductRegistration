@@ -1,87 +1,95 @@
 <template>
-  <div class="price-input">
-    <div class="input-wrapper">
-      <span class="currency-symbol">R$</span>
-      <input
-        type="text"
-        :value="formattedValue"
-        @input="handleInput"
-        @blur="handleBlur"
-        :class="['form-control', { 'error': isInvalid }]"
-        placeholder="0,00"
-      />
-    </div>
-  </div>
+  <input
+    ref="inputRef"
+    type="text"
+    v-model="formattedValue"
+    :class="['form-control', { 'error': isInvalid }]"
+    @blur="handleBlur"
+  />
 </template>
 
-<script setup>
-import { computed, ref } from 'vue'
-
-const props = defineProps({
-  modelValue: {
-    type: [String, Number],
-    default: ''
-  },
-  error: {
-    type: Boolean,
-    default: false
-  }
-})
-
-const emit = defineEmits(['update:modelValue', 'blur'])
+<script>
+import { computed, ref, onMounted } from 'vue'
+import { useCurrencyInput } from 'vue-currency-input'
 
 const touched = ref(false)
 
-const formatCurrency = (value) => {
-  if (!value) return ''
-  
-  const numericValue = value.toString().replace(/\D/g, '')
-  
-  const isDecimal = value.toString().includes('.')
-  const valueInCents = isDecimal ? Math.round(parseFloat(value) * 100) : numericValue
-  
-  const cents = valueInCents.toString().padStart(3, '0')
-  const reais = cents.slice(0, -2)
-  const centavos = cents.slice(-2)
-  
-  const formattedReais = reais.replace(/\B(?=(\d{3})+(?!\d))/g, '.')
-  
-  return `${formattedReais},${centavos}`
+const options = {
+  "locale": "pt-BR",
+  "currency": "BRL",
+  "currencyDisplay": "symbol",
+  "hideCurrencySymbolOnFocus": false,
+  "hideGroupingSeparatorOnFocus": false,
+  "hideNegligibleDecimalDigitsOnFocus": false,
+  "autoDecimalDigits": true,
+  "useGrouping": true,
+  "accountingSign": true,
+  "prefix": "R$ ",
+  "precision": 2,
 }
 
-const parseCurrency = (value) => {
-  if (!value) return ''
-  
-  const numericValue = value.toString().replace(/\D/g, '')
-  
-  const number = parseFloat(numericValue) / 100
-  
-  return number
-}
+export default {
+  name: 'CurrencyInput',
+  props: {
+    modelValue: {
+      type: [Number, String],
+      default: 0
+    },
+    error: Boolean
+  },
+  setup(props, { emit }) {
+    const inputValue = ref('')
+    const { inputRef, formattedValue } = useCurrencyInput({
+      ...options,
+      modelValue: inputValue,
+      onInput: (value) => {
+        emit('update:modelValue', value)
+        touched.value = true
+      }
+    })
 
-const formattedValue = computed(() => {
-  return formatCurrency(props.modelValue)
-})
+    // Sincroniza o valor inicial após a montagem do componente
+    onMounted(() => {
+      try {
+        const numValue = typeof props.modelValue === 'string' 
+          ? parseFloat(props.modelValue) 
+          : props.modelValue
+        
+        if (!isNaN(numValue)) {
+          inputValue.value = numValue.toString()
+        }
+      } catch (error) {
+        console.error('Erro ao inicializar valor:', error)
+      }
+    })
 
-const isInvalid = computed(() => {
-  const value = parseFloat(props.modelValue)
-  return (isNaN(value) || value <= 0) && touched.value
-})
+    const handleBlur = () => {
+      try {
+        emit('blur')
+        touched.value = true
+      } catch (error) {
+        console.error('Erro ao processar blur:', error)
+      }
+    }
 
-const handleInput = (event) => {
-  const value = event.target.value
-  const parsedValue = parseCurrency(value)
-  emit('update:modelValue', parsedValue)
-}
+    const isInvalid = computed(() => {
+      try {
+        const numValue = typeof props.modelValue === 'string' 
+          ? parseFloat(props.modelValue) 
+          : props.modelValue
+        return (isNaN(numValue) || numValue < 0) && touched.value
+      } catch (error) {
+        console.error('Erro ao validar valor:', error)
+        return false
+      }
+    })
 
-const handleBlur = () => {
-  touched.value = true
-  if (props.modelValue) {
-    const value = parseFloat(props.modelValue)
-    emit('update:modelValue', value.toFixed(2))
+    return { 
+      inputRef, 
+      formattedValue,
+      handleBlur,
+      isInvalid
+    }
   }
-  emit('blur')
 }
 </script>
-
-<style src="./styles.css" scoped></style>

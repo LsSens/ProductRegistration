@@ -14,9 +14,10 @@ export const formatText = (text, maxLength) => {
  * @param {number} price - Valor a ser formatado
  * @returns {string} Valor formatado em reais
  */
-export const formatPrice = (price) => {
-  return new Intl.NumberFormat('pt-BR', {
+export const formatPrice = (price, maxLength) => {
+  const formattedPrice = new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL'
   }).format(price)
+  return formattedPrice.length > maxLength ? formattedPrice.substring(0, maxLength) + '...' : formattedPrice
 } 

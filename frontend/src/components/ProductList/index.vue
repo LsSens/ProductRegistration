@@ -138,7 +138,6 @@ import PriceInput from '../PriceInput/index.vue'
 import CircularProgress from '../CircularProgress/index.vue'
 import { productService } from '@/services/productService'
 import * as Yup from 'yup'
-
 const toast = useToast()
 
 const products = ref([])
@@ -259,7 +258,7 @@ const handleSubmit = async () => {
     const formData = {
       name: formValues.value.name.trim(),
       description: formValues.value.description.trim(),
-      price: parseFloat(formValues.value.price),
+      price: formValues.value.price,
       quantity: parseInt(formValues.value.quantity)
     }
 
