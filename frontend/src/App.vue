@@ -1,5 +1,5 @@
 <script setup>
-// Layout principal
+import ScrollToTop from './components/ScrollToTop/index.vue'
 </script>
 
 <template>
@@ -9,6 +9,7 @@
     </header>
     <main>
       <router-view />
+      <ScrollToTop />
     </main>
   </div>
 </template>
