@@ -35,7 +35,10 @@ const formatCurrency = (value) => {
   
   const numericValue = value.toString().replace(/\D/g, '')
   
-  const cents = numericValue.padStart(3, '0')
+  const isDecimal = value.toString().includes('.')
+  const valueInCents = isDecimal ? Math.round(parseFloat(value) * 100) : numericValue
+  
+  const cents = valueInCents.toString().padStart(3, '0')
   const reais = cents.slice(0, -2)
   const centavos = cents.slice(-2)
   
