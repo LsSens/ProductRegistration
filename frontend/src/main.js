@@ -8,7 +8,6 @@ import 'vue-toastification/dist/index.css'
 
 const app = createApp(App)
 
-app.use(money3)
 app.use(Toast, {
   transition: "Vue-Toastification__bounce",
   maxToasts: 3,
