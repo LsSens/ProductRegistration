@@ -48,7 +48,6 @@ export default {
       }
     })
 
-    // Sincroniza o valor inicial após a montagem do componente
     onMounted(() => {
       try {
         const numValue = typeof props.modelValue === 'string' 
