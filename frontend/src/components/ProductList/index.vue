@@ -117,8 +117,8 @@
             <p>Tem certeza que deseja excluir o produto "{{ productToDelete.name }}"?</p>
             <div class="modal-actions">
               <button @click="closeModal" class="btn-cancel">Cancelar</button>
-              <button @click="deleteProduct" :disabled="loading" class="btn-delete">
-                {{ loading ? 'Excluindo...' : 'Confirmar' }}
+              <button @click="deleteProduct" :disabled="loadingDelete" class="btn-delete">
+                {{ loadingDelete ? 'Excluindo...' : 'Confirmar' }}
               </button>
             </div>
           </div>
@@ -143,6 +143,7 @@ const toast = useToast()
 
 const products = ref([])
 const loading = ref(false)
+const loadingDelete = ref(false)
 const initialLoading = ref(true)
 const loadingMore = ref(false)
 const currentPage = ref(1)
@@ -305,12 +306,15 @@ const confirmDelete = (product) => {
 
 const deleteProduct = async () => {
   try {
+    loadingDelete.value = true
     await productService.deleteProduct(productToDelete.value.id)
     products.value = products.value.filter(p => p.id !== productToDelete.value.id)
     showDeleteModal.value = false
     toast.success("Produto excluído com sucesso!")
   } catch (e) {
     toast.error("Erro ao excluir produto")
+  } finally {
+    loadingDelete.value = false
   }
 }
 
